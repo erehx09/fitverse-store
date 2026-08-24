@@ -250,18 +250,18 @@ app.get('/', (req, res) => {
                     <input type="hidden" id="p_price" name="total_price">
                     
                     <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Full Legal Name</label>
-                        <input type="text" name="customer_name" placeholder="Name" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Full Name</label>
+                        <input type="text" name="customer_name" placeholder="Enter your full name" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500">
                     </div>
 
                     <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Phone Number (11 Digits Only)</label>
+                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Phone Number (11 Digits)</label>
                         <input type="text" name="phone" placeholder="017XXXXXXXX" maxlength="11" required oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500 font-mono">
                     </div>
 
                     <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Delivery Address</label>
-                        <textarea name="address" placeholder="District, Thana, House No, Road No, Area Details" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500" rows="3"></textarea>
+                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Full Shipping Address</label>
+                        <textarea name="address" placeholder="Write District, Thana/Upazila, House/Road No, Area details" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500" rows="3"></textarea>
                     </div>
 
                     <button type="submit" class="w-full bg-[#0071e3] text-white font-bold uppercase py-4 text-xs tracking-widest hover:opacity-90 transition rounded-full">${c.checkout_button}</button>
@@ -778,4 +778,4 @@ app.post('/admin/product/delete', (req, res) => {
     res.redirect('/admin?pass=fitverse123');
 });
 
-app.listen(PORT, () => console.log(`FITVERSE Running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`FITVERSE NO-DROPDOWN V2 Running on http://localhost:${PORT}`));
