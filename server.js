@@ -18,6 +18,7 @@ function initDB() {
                 name: "FITVERSE Heavyweight Drop Hoodie", 
                 price: 3450, 
                 category: "Clothing", 
+                sizes: ["M", "L", "XL"],
                 images: [
                     "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800",
                     "https://images.unsplash.com/photo-1578587018452-892bacefd3f2?w=800"
@@ -28,6 +29,7 @@ function initDB() {
                 name: "FITVERSE Signature Track Pants", 
                 price: 2200, 
                 category: "Clothing", 
+                sizes: ["S", "M", "L"],
                 images: [
                     "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800"
                 ] 
@@ -70,6 +72,9 @@ function initDB() {
             if (p.image && !p.images) {
                 p.images = [p.image];
                 delete p.image;
+            }
+            if (!p.sizes) {
+                p.sizes = ["S", "M", "L", "XL", "XXL"];
             }
             return p;
         });
@@ -168,7 +173,7 @@ app.get('/', (req, res) => {
             .light .input-label { color: #6e6e73 !important; }
         </style>
     </head>
-    <body class="transition-colors duration-300 relative">
+    <body class="transition-colors duration-300 relative pb-20">
 
         <header class="sticky top-0 z-40 backdrop-blur-xl border-b px-4 sm:px-8 py-4 flex justify-between items-center transition-colors">
             <div class="flex items-center space-x-4">
@@ -182,7 +187,9 @@ app.get('/', (req, res) => {
                 <a href="#" onclick="filterByCategory('Everything')" class="nav-link hidden md:inline transition">${c.nav_home || 'Home'}</a>
                 <a href="#shop" onclick="filterByCategory('Everything')" class="nav-link transition">${c.nav_collection || 'Collection'}</a>
                 <button onclick="toggleTheme()" class="theme-btn border px-3 py-1 rounded-full text-[10px] tracking-wider uppercase transition">${c.nav_theme || 'Theme'}</button>
-                <a href="https://wa.me/88${c.whatsapp_number}" target="_blank" class="bg-[#0071e3] text-white px-3.5 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider transition rounded-full">${c.nav_support || 'Concierge'}</a>
+                <button onclick="openCartDrawer()" class="relative bg-white text-black px-4 py-2 rounded-full text-[11px] font-bold uppercase tracking-wider">
+                    Cart (<span id="cartCountNav">0</span>)
+                </button>
             </nav>
         </header>
 
@@ -231,40 +238,46 @@ app.get('/', (req, res) => {
             </div>
         </section>
 
-        <!-- Checkout Modal -->
-        <div id="checkoutModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4 backdrop-blur-md">
-            <div class="modal-box border p-6 sm:p-8 rounded-3xl max-w-lg w-full relative shadow-2xl max-h-[90vh] overflow-y-auto">
-                <button onclick="closeModal()" class="absolute top-5 right-6 text-gray-400 hover:text-red-500 text-xl font-bold">✕</button>
-                <h3 class="modal-title text-xl sm:text-2xl font-bold uppercase tracking-tight mb-1">${c.checkout_title}</h3>
-                
-                <!-- Modal Product Gallery -->
-                <div class="mb-4">
-                    <img id="modalMainImg" src="" class="w-full h-64 object-cover rounded-2xl border border-gray-800">
-                    <div id="modalThumbnails" class="flex space-x-2 mt-3 overflow-x-auto pb-2"></div>
+        <!-- CART SLIDE DRAWER -->
+        <div id="cartOverlay" onclick="closeCartDrawer()" class="fixed inset-0 bg-black/70 z-50 hidden backdrop-blur-sm"></div>
+        <div id="cartDrawer" class="fixed top-0 right-0 bottom-0 w-[90%] max-w-md bg-[#161618] z-50 transform translate-x-full transition-transform duration-300 p-6 flex flex-col justify-between shadow-2xl overflow-y-auto">
+            <div>
+                <div class="flex justify-between items-center pb-4 border-b border-gray-800">
+                    <h3 class="font-bold text-lg uppercase tracking-wider text-white">Your Shopping Cart (<span id="cartCountTitle">0</span>)</h3>
+                    <button onclick="closeCartDrawer()" class="text-xl font-bold text-gray-400 hover:text-white">✕</button>
                 </div>
 
-                <p id="p_display" class="text-xs sm:text-sm font-medium mb-6 text-gray-400 border-b border-gray-700 pb-3"></p>
-                
-                <form action="/order" method="POST" class="space-y-4">
-                    <input type="hidden" id="p_name" name="product_name">
-                    <input type="hidden" id="p_price" name="total_price">
+                <div id="cartItemsList" class="mt-6 space-y-4 max-h-[45vh] overflow-y-auto pr-1">
+                </div>
+            </div>
+
+            <!-- Cart Checkout Form Process -->
+            <div class="pt-4 border-t border-gray-800 space-y-4">
+                <div class="space-y-1 font-mono text-xs text-gray-300">
+                    <div class="flex justify-between"><span>Subtotal:</span><span>BDT <span id="cartSubtotal">0</span></span></div>
+                    <div class="flex justify-between text-blue-400"><span>Delivery Charge:</span><span>BDT <span id="cartDelivery">0</span></span></div>
+                    <div class="flex justify-between text-sm font-bold text-white pt-2 border-t border-gray-700"><span>Total:</span><span>BDT <span id="cartGrandTotal">0</span></span></div>
+                </div>
+
+                <form action="/order" method="POST" class="space-y-3">
+                    <input type="hidden" id="cartProductNames" name="product_name">
+                    <input type="hidden" id="cartTotalPrice" name="total_price">
+
+                    <input type="text" name="customer_name" placeholder="Full Legal Name" required class="input-box w-full p-3 rounded-xl text-xs focus:outline-none">
+                    <input type="text" name="phone" placeholder="Phone Number (11 Digits)" maxlength="11" required oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-box w-full p-3 rounded-xl text-xs focus:outline-none font-mono">
                     
                     <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Full Name</label>
-                        <input type="text" name="customer_name" placeholder="Enter your full name" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500">
+                        <label class="block text-[10px] uppercase text-gray-400 mb-1">Select Delivery District</label>
+                        <select id="cartDistrictSelect" name="district" onchange="calculateDeliveryCharge()" required class="input-box w-full p-3 rounded-xl text-xs focus:outline-none">
+                            <option value="">Select District</option>
+                            <option value="Dhaka">Dhaka (Inside Dhaka - BDT 80)</option>
+                            <option value="Outside Dhaka">Outside Dhaka (All Other Districts - BDT 130)</option>
+                        </select>
                     </div>
 
-                    <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Phone Number (11 Digits)</label>
-                        <input type="text" name="phone" placeholder="017XXXXXXXX" maxlength="11" required oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500 font-mono">
-                    </div>
+                    <textarea name="address" placeholder="Full Address (House no, Road, Thana/Area details)" required class="input-box w-full p-3 rounded-xl text-xs focus:outline-none" rows="2"></textarea>
 
-                    <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Full Shipping Address</label>
-                        <textarea name="address" placeholder="Write District, Thana/Upazila, House/Road No, Area details" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500" rows="3"></textarea>
-                    </div>
-
-                    <button type="submit" class="w-full bg-[#0071e3] text-white font-bold uppercase py-4 text-xs tracking-widest hover:opacity-90 transition rounded-full">${c.checkout_button}</button>
+                    <button type="submit" id="confirmOrderBtn" class="w-full bg-[#0071e3] text-white font-bold uppercase py-3.5 text-xs tracking-widest rounded-full opacity-50 cursor-not-allowed" disabled>CONFIRM ORDER</button>
                 </form>
             </div>
         </div>
@@ -272,6 +285,8 @@ app.get('/', (req, res) => {
         <script>
             const allProducts = ${JSON.stringify(products)};
             const buyButtonText = "${c.buy_btn_text || 'Acquire'}";
+            let cart = [];
+            let selectedSizes = {};
 
             function renderProducts(items) {
                 const grid = document.getElementById('productGrid');
@@ -283,30 +298,146 @@ app.get('/', (req, res) => {
                 grid.innerHTML = items.map(p => {
                     const imgList = (p.images && p.images.length > 0) ? p.images : ['https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800'];
                     const mainImg = imgList[0];
+                    const sizesList = (p.sizes && p.sizes.length > 0) ? p.sizes : ['S', 'M', 'L', 'XL', 'XXL'];
                     
-                    const thumbs = imgList.map((img, i) => \`
-                        <img src="\${img}" onclick="switchCardImage(\${p.id}, '\${img}')" class="w-12 h-12 object-cover rounded-lg border border-gray-700 cursor-pointer hover:border-blue-500 transition">
+                    const sizeButtons = sizesList.map(sz => \`
+                        <button type="button" id="size-btn-\${p.id}-\${sz}" onclick="selectSize(\${p.id}, '\${sz}')" class="size-btn-\${p.id} border border-gray-700 px-3 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase hover:border-white transition">\${sz}</button>
+                    \`).join('');
+
+                    const thumbs = imgList.map((img) => \`
+                        <img src="\${img}" onclick="switchCardImage(\${p.id}, '\${img}')" class="w-10 h-10 object-cover rounded-lg border border-gray-700 cursor-pointer hover:border-blue-500 transition">
                     \`).join('');
 
                     return \`
                         <div class="product-card bg-[#161618] border border-gray-800 rounded-3xl overflow-hidden flex flex-col justify-between group transition-all duration-500 hover:border-gray-500 shadow-2xl">
-                            <div class="h-[320px] sm:h-[420px] overflow-hidden bg-black relative">
+                            <div class="h-[320px] sm:h-[380px] overflow-hidden bg-black relative">
                                 <img id="card-img-\${p.id}" src="\${mainImg}" class="h-full w-full object-cover group-hover:scale-105 transition duration-700">
-                                <span class="absolute top-4 left-4 bg-black/70 backdrop-blur-md border border-gray-700 px-3.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-widest text-gray-200">\${p.category}</span>
+                                <span class="absolute top-4 left-4 bg-black/70 backdrop-blur-md border border-gray-700 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-widest text-gray-200">\${p.category}</span>
                             </div>
-                            <div class="p-5 sm:p-7">
+                            <div class="p-5 sm:p-6 space-y-4">
                                 <h3 class="product-title text-base sm:text-lg font-semibold tracking-tight uppercase">\${p.name}</h3>
                                 
-                                \${imgList.length > 1 ? \`<div class="flex space-x-2 mt-3">\${thumbs}</div>\` : ''}
+                                \${imgList.length > 1 ? \`<div class="flex space-x-2">\${thumbs}</div>\` : ''}
 
-                                <div class="flex justify-between items-center mt-6 pt-4 border-t border-gray-800">
-                                    <span class="product-price text-lg sm:text-xl font-bold font-mono">BDT \${p.price}</span>
-                                    <button onclick="orderModal(\${p.id})" class="buy-btn bg-white text-black px-5 sm:px-6 py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition rounded-full shadow-lg">\${buyButtonText}</button>
+                                <div>
+                                    <span class="block text-[10px] uppercase tracking-widest text-gray-400 mb-1.5">Select Size:</span>
+                                    <div class="flex flex-wrap gap-2">
+                                        \${sizeButtons}
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-center pt-3 border-t border-gray-800">
+                                    <span class="product-price text-lg font-bold font-mono">BDT \${p.price}</span>
+                                    <button onclick="addToCart(\${p.id})" class="buy-btn bg-white text-black px-5 py-2.5 text-xs font-bold uppercase tracking-wider hover:opacity-90 transition rounded-full shadow-lg">+ Add to Cart</button>
                                 </div>
                             </div>
                         </div>
                     \`;
                 }).join('');
+            }
+
+            function selectSize(productId, size) {
+                selectedSizes[productId] = size;
+                document.querySelectorAll('.size-btn-' + productId).forEach(b => {
+                    b.classList.remove('bg-white', 'text-black', 'border-white');
+                    b.classList.add('border-gray-700');
+                });
+                const selectedBtn = document.getElementById('size-btn-' + productId + '-' + size);
+                if(selectedBtn) {
+                    selectedBtn.classList.add('bg-white', 'text-black', 'border-white');
+                }
+            }
+
+            function addToCart(productId) {
+                const p = allProducts.find(item => item.id === productId);
+                if(!p) return;
+
+                const chosenSize = selectedSizes[productId];
+                if(!chosenSize) {
+                    alert('Please select a size first for ' + p.name);
+                    return;
+                }
+
+                cart.push({
+                    id: p.id,
+                    name: p.name,
+                    price: p.price,
+                    size: chosenSize,
+                    image: (p.images && p.images[0]) ? p.images[0] : ''
+                });
+
+                updateCartUI();
+                openCartDrawer();
+            }
+
+            function removeFromCart(index) {
+                cart.splice(index, 1);
+                updateCartUI();
+            }
+
+            function updateCartUI() {
+                document.getElementById('cartCountNav').innerText = cart.length;
+                document.getElementById('cartCountTitle').innerText = cart.length;
+
+                const cartList = document.getElementById('cartItemsList');
+                if(cart.length === 0) {
+                    cartList.innerHTML = '<p class="text-center text-xs text-gray-500 uppercase py-8">Your cart is empty.</p>';
+                } else {
+                    cartList.innerHTML = cart.map((item, idx) => \`
+                        <div class="flex items-center justify-between bg-black/40 p-3 rounded-2xl border border-gray-800">
+                            <div class="flex items-center space-x-3">
+                                <img src="\${item.image}" class="w-12 h-12 object-cover rounded-xl">
+                                <div>
+                                    <p class="font-bold text-xs text-white uppercase">\${item.name}</p>
+                                    <span class="text-[10px] text-gray-400">Size: <strong class="text-white">\${item.size}</strong> | BDT \${item.price}</span>
+                                </div>
+                            </div>
+                            <button onclick="removeFromCart(\${idx})" class="text-red-500 font-bold hover:opacity-75 p-1 text-sm">✕</button>
+                        </div>
+                    \`).join('');
+                }
+
+                calculateDeliveryCharge();
+            }
+
+            function calculateDeliveryCharge() {
+                const subtotal = cart.reduce((sum, i) => sum + i.price, 0);
+                const district = document.getElementById('cartDistrictSelect').value;
+                let delivery = 0;
+
+                if(cart.length > 0 && district !== '') {
+                    delivery = (district === 'Dhaka') ? 80 : 130;
+                }
+
+                const total = subtotal + delivery;
+
+                document.getElementById('cartSubtotal').innerText = subtotal;
+                document.getElementById('cartDelivery').innerText = delivery;
+                document.getElementById('cartGrandTotal').innerText = total;
+
+                // Set Hidden Form Inputs
+                const itemSummary = cart.map(i => i.name + ' (' + i.size + ')').join(', ');
+                document.getElementById('cartProductNames').value = itemSummary;
+                document.getElementById('cartTotalPrice').value = total;
+
+                const btn = document.getElementById('confirmOrderBtn');
+                if(cart.length > 0 && district !== '') {
+                    btn.disabled = false;
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    btn.disabled = true;
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            }
+
+            function openCartDrawer() {
+                document.getElementById('cartOverlay').classList.remove('hidden');
+                document.getElementById('cartDrawer').classList.remove('translate-x-full');
+            }
+
+            function closeCartDrawer() {
+                document.getElementById('cartOverlay').classList.add('hidden');
+                document.getElementById('cartDrawer').classList.add('translate-x-full');
             }
 
             function switchCardImage(pid, newSrc) {
@@ -359,41 +490,6 @@ app.get('/', (req, res) => {
                     html.classList.add('dark');
                 }
             }
-
-            let currentVid = 0;
-            const slides = document.querySelectorAll('.video-slide');
-            if(slides.length > 1) {
-                setInterval(() => {
-                    slides[currentVid].style.opacity = '0';
-                    currentVid = (currentVid + 1) % slides.length;
-                    slides[currentVid].style.opacity = '0.5';
-                }, 5000);
-            }
-
-            function orderModal(pid) {
-                const p = allProducts.find(item => item.id === pid);
-                if(!p) return;
-
-                document.getElementById('p_name').value = p.name;
-                document.getElementById('p_price').value = p.price;
-                document.getElementById('p_display').innerText = p.name + ' — BDT ' + p.price;
-
-                const imgList = (p.images && p.images.length > 0) ? p.images : ['https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800'];
-                const modalMain = document.getElementById('modalMainImg');
-                modalMain.src = imgList[0];
-
-                const thumbBox = document.getElementById('modalThumbnails');
-                if(imgList.length > 1) {
-                    thumbBox.innerHTML = imgList.map(img => \`
-                        <img src="\${img}" onclick="document.getElementById('modalMainImg').src = '\${img}'" class="w-14 h-14 object-cover rounded-lg border border-gray-700 cursor-pointer hover:border-blue-500">
-                    \`).join('');
-                } else {
-                    thumbBox.innerHTML = '';
-                }
-
-                document.getElementById('checkoutModal').classList.remove('hidden');
-            }
-            function closeModal() { document.getElementById('checkoutModal').classList.add('hidden'); }
         </script>
     </body>
     </html>`);
@@ -452,25 +548,16 @@ app.get('/admin', (req, res) => {
         </tr>
     `).join('');
 
-    const categoryRows = categories.map(cat => `
-        <div class="flex items-center justify-between bg-black p-3 rounded-xl border border-gray-800">
-            <span class="font-bold text-xs text-white uppercase">${cat}</span>
-            <form action="/admin/category/delete?pass=fitverse123" method="POST">
-                <input type="hidden" name="category" value="${cat}">
-                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold text-[10px] uppercase px-3 py-1.5 rounded-lg">Remove</button>
-            </form>
-        </div>
-    `).join('');
-
     const productManageRows = products.map(p => {
         const pImages = (p.images && p.images.length > 0) ? p.images : ['https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800'];
+        const pSizes = (p.sizes && p.sizes.length > 0) ? p.sizes.join(', ') : 'All';
         return `
         <div class="flex items-center justify-between bg-black p-3 rounded-xl border border-gray-800">
             <div class="flex items-center space-x-3">
                 <img src="${pImages[0]}" class="w-10 h-10 object-cover rounded-lg">
                 <div>
                     <p class="font-bold text-xs text-white">${p.name}</p>
-                    <span class="text-[10px] text-gray-400">BDT ${p.price} | ${p.category} (${pImages.length} Images)</span>
+                    <span class="text-[10px] text-gray-400">BDT ${p.price} | Sizes: ${pSizes}</span>
                 </div>
             </div>
             <form action="/admin/product/delete?pass=fitverse123" method="POST">
@@ -507,7 +594,7 @@ app.get('/admin', (req, res) => {
                                 <th class="p-4">Customer</th>
                                 <th class="p-4">Phone</th>
                                 <th class="p-4">Address</th>
-                                <th class="p-4">Item</th>
+                                <th class="p-4">Items & Size</th>
                                 <th class="p-4">Status</th>
                                 <th class="p-4">Actions</th>
                             </tr>
@@ -519,97 +606,10 @@ app.get('/admin', (req, res) => {
                 </div>
             </div>
 
+            <!-- Product Form with Size Checkboxes -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-[#1c1c1e] border border-gray-800 p-6 sm:p-8 rounded-3xl space-y-4">
-                    <h2 class="text-lg sm:text-xl font-bold uppercase text-white tracking-wider">Add Navigation Category</h2>
-                    <form action="/admin/category/add?pass=fitverse123" method="POST" class="flex space-x-3 text-xs">
-                        <input type="text" name="category" placeholder="Category Name" required class="flex-1 bg-black border border-gray-800 p-3.5 rounded-xl text-white">
-                        <button type="submit" class="bg-[#0071e3] text-white font-bold uppercase px-6 py-3.5 rounded-xl hover:opacity-90">Add</button>
-                    </form>
-                </div>
-
-                <div class="bg-[#1c1c1e] border border-gray-800 p-6 sm:p-8 rounded-3xl space-y-4">
-                    <h2 class="text-lg sm:text-xl font-bold uppercase text-white tracking-wider">Active Sidebar Categories</h2>
-                    <div class="space-y-3 max-h-60 overflow-y-auto">
-                        ${categoryRows}
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-[#1c1c1e] border border-gray-800 p-6 sm:p-8 rounded-3xl space-y-4">
-                <h2 class="text-lg sm:text-xl font-bold uppercase text-white tracking-wider">Dynamic Navigation & Button Text Editor</h2>
-                <form action="/admin/content/update?pass=fitverse123" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                    <div>
-                        <label class="block text-gray-400 mb-1">Brand Name Title</label>
-                        <input type="text" name="brand_name" value="${c.brand_name || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Nav Home Text</label>
-                        <input type="text" name="nav_home" value="${c.nav_home || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Nav Collection Text</label>
-                        <input type="text" name="nav_collection" value="${c.nav_collection || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Nav Theme Text</label>
-                        <input type="text" name="nav_theme" value="${c.nav_theme || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Nav Support Text</label>
-                        <input type="text" name="nav_support" value="${c.nav_support || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Product Card Buy Button Text</label>
-                        <input type="text" name="buy_btn_text" value="${c.buy_btn_text || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Hero Tagline</label>
-                        <input type="text" name="hero_tagline" value="${c.hero_tagline || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Hero Main Heading</label>
-                        <input type="text" name="hero_title" value="${c.hero_title || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Hero Subtitle</label>
-                        <input type="text" name="hero_subtitle" value="${c.hero_subtitle || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Hero Button Text</label>
-                        <input type="text" name="hero_button_text" value="${c.hero_button_text || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Section Badge</label>
-                        <input type="text" name="section_badge" value="${c.section_badge || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div>
-                        <label class="block text-gray-400 mb-1">Section Title</label>
-                        <input type="text" name="section_title" value="${c.section_title || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-gray-400 mb-1">WhatsApp Support Phone</label>
-                        <input type="text" name="whatsapp_number" value="${c.whatsapp_number || ''}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-
-                    <div class="md:col-span-2 border border-gray-800 p-4 rounded-xl bg-black space-y-2">
-                        <label class="block text-amber-400 font-bold mb-1">Upload New Hero Video (.mp4 File)</label>
-                        <input type="file" name="video_file" accept="video/mp4" class="w-full text-gray-400">
-                    </div>
-
-                    <div class="md:col-span-2">
-                        <label class="block text-gray-400 mb-1">OR Paste Background Video URL Links (Comma-separated .mp4)</label>
-                        <input type="text" name="hero_videos" value="${(c.hero_videos || []).join(', ')}" class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
-                    </div>
-
-                    <button type="submit" class="md:col-span-2 bg-[#0071e3] text-white font-bold uppercase py-4 rounded-full tracking-widest hover:opacity-90 transition">Save All Site Content & Upload Video</button>
-                </form>
-            </div>
-
-            <!-- Multi Input Image Product Form -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div class="bg-[#1c1c1e] border border-gray-800 p-6 sm:p-8 rounded-3xl space-y-4">
-                    <h2 class="text-lg sm:text-xl font-bold uppercase text-gray-200 tracking-wider">Add Product (Separate Image Uploads)</h2>
+                    <h2 class="text-lg sm:text-xl font-bold uppercase text-gray-200 tracking-wider">Add New Product + Sizes</h2>
                     <form action="/admin/product/add?pass=fitverse123" method="POST" enctype="multipart/form-data" class="space-y-3 text-xs">
                         <input type="text" name="name" placeholder="Product Title" required class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
                         <input type="number" name="price" placeholder="Price (BDT)" required class="w-full bg-black border border-gray-800 p-3.5 rounded-xl">
@@ -618,19 +618,27 @@ app.get('/admin', (req, res) => {
                             ${categories.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
                         </select>
                         
+                        <div class="border border-gray-800 p-4 rounded-2xl bg-black space-y-2">
+                            <label class="block text-amber-400 font-bold mb-1">Select Available Sizes for this item:</label>
+                            <div class="flex space-x-4 text-white font-bold">
+                                <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" name="sizes" value="S" checked> <span>S</span></label>
+                                <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" name="sizes" value="M" checked> <span>M</span></label>
+                                <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" name="sizes" value="L" checked> <span>L</span></label>
+                                <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" name="sizes" value="XL" checked> <span>XL</span></label>
+                                <label class="flex items-center space-x-1 cursor-pointer"><input type="checkbox" name="sizes" value="XXL"> <span>XXL</span></label>
+                            </div>
+                        </div>
+
                         <div class="border border-gray-800 p-4 rounded-2xl bg-black space-y-3">
                             <label class="block text-amber-400 font-bold">Product Images & Size Chart File Select</label>
-                            
                             <div>
                                 <span class="block text-gray-400 text-[10px] uppercase mb-1">1. Main Product Image (Required)</span>
                                 <input type="file" name="img_file_1" accept="image/*" class="w-full text-gray-400">
                             </div>
-
                             <div>
                                 <span class="block text-gray-400 text-[10px] uppercase mb-1">2. Second Image / Angle (Optional)</span>
                                 <input type="file" name="img_file_2" accept="image/*" class="w-full text-gray-400">
                             </div>
-
                             <div>
                                 <span class="block text-gray-400 text-[10px] uppercase mb-1">3. Size Chart Image (Optional)</span>
                                 <input type="file" name="img_file_3" accept="image/*" class="w-full text-gray-400">
@@ -689,68 +697,16 @@ app.post('/admin/order/delete', (req, res) => {
     res.redirect('/admin?pass=fitverse123');
 });
 
-app.post('/admin/category/add', (req, res) => {
-    const db = readDB();
-    const newCat = req.body.category.trim();
-    if (!db.categories) db.categories = [];
-    if (newCat && !db.categories.includes(newCat)) {
-        db.categories.push(newCat);
-        writeDB(db);
-    }
-    res.redirect('/admin?pass=fitverse123');
-});
-
-app.post('/admin/category/delete', (req, res) => {
-    const db = readDB();
-    const catToDelete = req.body.category;
-    if (db.categories) {
-        db.categories = db.categories.filter(c => c !== catToDelete);
-        writeDB(db);
-    }
-    res.redirect('/admin?pass=fitverse123');
-});
-
-app.post('/admin/content/update', upload.single('video_file'), (req, res) => {
-    const db = readDB();
-    const { brand_name, nav_home, nav_collection, nav_theme, nav_support, buy_btn_text, hero_tagline, hero_title, hero_subtitle, hero_button_text, section_badge, section_title, whatsapp_number, hero_videos } = req.body;
-    
-    db.site_content.brand_name = brand_name;
-    db.site_content.nav_home = nav_home;
-    db.site_content.nav_collection = nav_collection;
-    db.site_content.nav_theme = nav_theme;
-    db.site_content.nav_support = nav_support;
-    db.site_content.buy_btn_text = buy_btn_text;
-    db.site_content.hero_tagline = hero_tagline;
-    db.site_content.hero_title = hero_title;
-    db.site_content.hero_subtitle = hero_subtitle;
-    db.site_content.hero_button_text = hero_button_text;
-    db.site_content.section_badge = section_badge;
-    db.site_content.section_title = section_title;
-    db.site_content.whatsapp_number = whatsapp_number;
-
-    let vList = hero_videos ? hero_videos.split(',').map(v => v.trim()).filter(v => v !== '') : [];
-
-    if (req.file) {
-        const uploadedVidPath = `/uploads/${req.file.filename}`;
-        vList.unshift(uploadedVidPath);
-    }
-
-    db.site_content.hero_videos = vList;
-    writeDB(db);
-    res.redirect('/admin?pass=fitverse123');
-});
-
-// Multi-Image Upload API
+// Multi-Image & Size Selection Product Add
 app.post('/admin/product/add', upload.fields([
     { name: 'img_file_1', maxCount: 1 },
     { name: 'img_file_2', maxCount: 1 },
     { name: 'img_file_3', maxCount: 1 }
 ]), (req, res) => {
     const db = readDB();
-    const { name, price, category, image_urls } = req.body;
+    const { name, price, category, image_urls, sizes } = req.body;
     
     let imgList = [];
-
     if (req.files) {
         if (req.files.img_file_1 && req.files.img_file_1[0]) imgList.push(`/uploads/${req.files.img_file_1[0].filename}`);
         if (req.files.img_file_2 && req.files.img_file_2[0]) imgList.push(`/uploads/${req.files.img_file_2[0].filename}`);
@@ -766,7 +722,14 @@ app.post('/admin/product/add', upload.fields([
         imgList = ['https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=800'];
     }
 
-    db.products.push({ id: Date.now(), name, price: Number(price), category, images: imgList });
+    let sizeList = [];
+    if (sizes) {
+        sizeList = Array.isArray(sizes) ? sizes : [sizes];
+    } else {
+        sizeList = ["S", "M", "L", "XL", "XXL"];
+    }
+
+    db.products.push({ id: Date.now(), name, price: Number(price), category, sizes: sizeList, images: imgList });
     writeDB(db);
     res.redirect('/admin?pass=fitverse123');
 });
@@ -778,4 +741,4 @@ app.post('/admin/product/delete', (req, res) => {
     res.redirect('/admin?pass=fitverse123');
 });
 
-app.listen(PORT, () => console.log(`FITVERSE NO-DROPDOWN V2 Running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`FITVERSE Size & Cart System Running on http://localhost:${PORT}`));
