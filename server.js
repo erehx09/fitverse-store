@@ -259,36 +259,12 @@ app.get('/', (req, res) => {
                         <input type="text" name="phone" placeholder="017XXXXXXXX" maxlength="11" required oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500 font-mono">
                     </div>
 
-                    <!-- Only Division and District (Upazila removed) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Division</label>
-                            <select id="divisionSelect" onchange="updateDistricts()" required class="input-box w-full p-3.5 rounded-xl text-xs focus:outline-none focus:border-blue-500">
-                                <option value="">Division</option>
-                                <option value="Sylhet Division">Sylhet</option>
-                                <option value="Dhaka Division">Dhaka</option>
-                                <option value="Chittagong Division">Chittagong</option>
-                                <option value="Rajshahi Division">Rajshahi</option>
-                                <option value="Khulna Division">Khulna</option>
-                                <option value="Barishal Division">Barishal</option>
-                                <option value="Rangpur Division">Rangpur</option>
-                                <option value="Mymensingh Division">Mymensingh</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="input-label block text-[10px] uppercase tracking-widest mb-1">District</label>
-                            <select id="districtSelect" required class="input-box w-full p-3.5 rounded-xl text-xs focus:outline-none focus:border-blue-500">
-                                <option value="">District</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Street / Thana / House / Village Details</label>
-                        <textarea id="fullAddress" name="address" placeholder="Thana, House no, Road no, Area details" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500" rows="2"></textarea>
+                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Delivery Address</label>
+                        <textarea name="address" placeholder="District, Thana, House No, Road No, Area Details" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500" rows="3"></textarea>
                     </div>
 
-                    <button type="submit" onclick="concatAddress()" class="w-full bg-[#0071e3] text-white font-bold uppercase py-4 text-xs tracking-widest hover:opacity-90 transition rounded-full">${c.checkout_button}</button>
+                    <button type="submit" class="w-full bg-[#0071e3] text-white font-bold uppercase py-4 text-xs tracking-widest hover:opacity-90 transition rounded-full">${c.checkout_button}</button>
                 </form>
             </div>
         </div>
@@ -392,36 +368,6 @@ app.get('/', (req, res) => {
                     currentVid = (currentVid + 1) % slides.length;
                     slides[currentVid].style.opacity = '0.5';
                 }, 5000);
-            }
-
-            const bdData = {
-                "Sylhet Division": ["Sylhet District", "Habiganj District", "Moulvibazar District", "Sunamganj District"],
-                "Dhaka Division": ["Dhaka District", "Faridpur District", "Gazipur District", "Gopalganj District", "Kishoreganj District", "Madaripur District", "Manikganj District", "Munshiganj District", "Narayanganj District", "Narsingdi District", "Rajbari District", "Shariatpur District", "Tangail District"],
-                "Chittagong Division": ["Chittagong District", "Cox's Bazar District", "Cumilla District", "Noakhali District", "Feni District", "Lakshmipur District", "Chandpur District", "Brahmanbaria District", "Khagrachhari District", "Rangamati District", "Bandarban District"],
-                "Rajshahi Division": ["Rajshahi District", "Bogura District", "Joypurhat District", "Naogaon District", "Natore District", "Chapainawabganj District", "Pabna District", "Sirajganj District"],
-                "Khulna Division": ["Khulna District", "Bagerhat District", "Chuadanga District", "Jashore District", "Jhenaidah District", "Kushtia District", "Magura District", "Meherpur District", "Narail District", "Satkhira District"],
-                "Barishal Division": ["Barishal District", "Bhola District", "Barguna District", "Jhalokathi District", "Patuakhali District", "Pirojpur District"],
-                "Rangpur Division": ["Rangpur District", "Dinajpur District", "Gaibandha District", "Kurigram District", "Lalmonirhat District", "Nilphamari District", "Panchagarh District", "Thakurgaon District"],
-                "Mymensingh Division": ["Mymensingh District", "Jamalpur District", "Netrokona District", "Sherpur District"]
-            };
-
-            function updateDistricts() {
-                const div = document.getElementById('divisionSelect').value;
-                const distSelect = document.getElementById('districtSelect');
-                distSelect.innerHTML = '<option value="">District</option>';
-
-                if(bdData[div]) {
-                    bdData[div].forEach(d => {
-                        distSelect.innerHTML += '<option value="' + d + '">' + d + '</option>';
-                    });
-                }
-            }
-
-            function concatAddress() {
-                const div = document.getElementById('divisionSelect').value;
-                const dist = document.getElementById('districtSelect').value;
-                const detail = document.getElementById('fullAddress').value;
-                document.getElementById('fullAddress').value = div + ' -> ' + dist + ' -> ' + detail;
             }
 
             function orderModal(pid) {
