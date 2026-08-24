@@ -231,7 +231,7 @@ app.get('/', (req, res) => {
             </div>
         </section>
 
-        <!-- Checkout Modal with Image Switcher -->
+        <!-- Checkout Modal -->
         <div id="checkoutModal" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4 backdrop-blur-md">
             <div class="modal-box border p-6 sm:p-8 rounded-3xl max-w-lg w-full relative shadow-2xl max-h-[90vh] overflow-y-auto">
                 <button onclick="closeModal()" class="absolute top-5 right-6 text-gray-400 hover:text-red-500 text-xl font-bold">✕</button>
@@ -259,7 +259,7 @@ app.get('/', (req, res) => {
                         <input type="text" name="phone" placeholder="017XXXXXXXX" maxlength="11" required oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500 font-mono">
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Division</label>
                             <select id="divisionSelect" onchange="updateDistricts()" required class="input-box w-full p-3.5 rounded-xl text-xs focus:outline-none focus:border-blue-500">
@@ -276,21 +276,15 @@ app.get('/', (req, res) => {
                         </div>
                         <div>
                             <label class="input-label block text-[10px] uppercase tracking-widest mb-1">District</label>
-                            <select id="districtSelect" onchange="updateUpazilas()" required class="input-box w-full p-3.5 rounded-xl text-xs focus:outline-none focus:border-blue-500">
+                            <select id="districtSelect" required class="input-box w-full p-3.5 rounded-xl text-xs focus:outline-none focus:border-blue-500">
                                 <option value="">District</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Upazila / Thana</label>
-                            <select id="upazilaSelect" required class="input-box w-full p-3.5 rounded-xl text-xs focus:outline-none focus:border-blue-500">
-                                <option value="">Upazila</option>
                             </select>
                         </div>
                     </div>
 
                     <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Street / House / Village Details</label>
-                        <textarea id="fullAddress" name="address" placeholder="House no, Road no, Area details" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500" rows="2"></textarea>
+                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Street / Thana / House / Area Details</label>
+                        <textarea id="fullAddress" name="address" placeholder="Thana, House no, Road no, Area details" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500" rows="2"></textarea>
                     </div>
 
                     <button type="submit" onclick="concatAddress()" class="w-full bg-[#0071e3] text-white font-bold uppercase py-4 text-xs tracking-widest hover:opacity-90 transition rounded-full">${c.checkout_button}</button>
@@ -400,111 +394,24 @@ app.get('/', (req, res) => {
             }
 
             const bdData = {
-                "Sylhet Division": {
-                    "Sylhet District": ["Sylhet Sadar", "Beanibazar", "Golapganj", "Balaganj", "Bishwanath", "Companiganj", "Dakshin Surma", "Fenchuganj", "Gowainghat", "Jaintiapur", "Kanaighat", "Osmaninagar", "Zakiganj"],
-                    "Habiganj District": ["Habiganj Sadar", "Ajmiriganj", "Bahubal", "Baniachong", "Chunarughat", "Lakhai", "Madhabpur", "Nabiganj", "Shayestaganj"],
-                    "Moulvibazar District": ["Moulvibazar Sadar", "Barlekha", "Juri", "Kamalganj", "Kulaura", "Rajnagar", "Sreemangal"],
-                    "Sunamganj District": ["Sunamganj Sadar", "Bishwambharpur", "Chhatak", "Dakshin Sunamganj", "Derai", "Dharampasha", "Dowarabazar", "Jagannathpur", "Jamalganj", "Madhyanagar", "Shalla", "Shantiganj", "Tahirpur"]
-                },
-                "Dhaka Division": {
-                    "Dhaka District": ["Dhamrai", "Dohar", "Keraniganj", "Nawabganj", "Savar"],
-                    "Faridpur District": ["Faridpur Sadar", "Alfadanga", "Bhanga", "Boalmari", "Charbhadrasan", "Madhukhali", "Nagarkanda", "Sadarpur", "Saltha"],
-                    "Gazipur District": ["Gazipur Sadar", "Kaliakair", "Kaliganj", "Kapasia", "Sreepur"],
-                    "Gopalganj District": ["Gopalganj Sadar", "Kashiani", "Kotalipara", "Muksudpur", "Tungipara"],
-                    "Kishoreganj District": ["Kishoreganj Sadar", "Austagram", "Bajitpur", "Bhairab", "Hossainpur", "Itna", "Karimganj", "Katiadi", "Kuliarchar", "Mithamain", "Nikli", "Pakundia", "Tarail"],
-                    "Madaripur District": ["Madaripur Sadar", "Kalkini", "Rajoir", "Shibchar"],
-                    "Manikganj District": ["Manikganj Sadar", "Daulatpur", "Ghior", "Harirampur", "Saturia", "Shibalaya", "Singair"],
-                    "Munshiganj District": ["Munshiganj Sadar", "Gazaria", "Lohajang", "Sirajdikhan", "Sreenagar", "Tongibari"],
-                    "Narayanganj District": ["Narayanganj Sadar", "Araihazar", "Bandar", "Rupganj", "Sonargaon"],
-                    "Narsingdi District": ["Narsingdi Sadar", "Belabo", "Monohardi", "Palash", "Raipura", "Shibpur"],
-                    "Rajbari District": ["Rajbari Sadar", "Baliakandi", "Goalanda", "Kalukhali", "Pangsha"],
-                    "Shariatpur District": ["Shariatpur Sadar", "Bhedarganj", "Damudya", "Gosairhat", "Naria", "Zajira"],
-                    "Tangail District": ["Tangail Sadar", "Basail", "Bhuapur", "Delduar", "Dhanbari", "Ghatail", "Gopalpur", "Kalihati", "Madhupur", "Mirzapur", "Nagarpur", "Sakhipur"]
-                },
-                "Chittagong Division": {
-                    "Chittagong District": ["Anwara", "Banshkhali", "Boalkhali", "Chandanaish", "Fatikchhari", "Hathazari", "Lohagara", "Mirsharai", "Patiya", "Rangunia", "Raozan", "Sandwip", "Satkania", "Sitakunda"],
-                    "Cox's Bazar District": ["Cox's Bazar Sadar", "Chakaria", "Kutubdia", "Maheshkhali", "Ramu", "Teknaf", "Ukhia", "Pekua", "Eidgaon"],
-                    "Cumilla District": ["Cumilla Sadar", "Barura", "Brahmanpara", "Burichang", "Chandina", "Chauddagram", "Daudkandi", "Debidwar", "Homna", "Laksam", "Muradnagar", "Nangalkot", "Meghna", "Titas", "Monoharganj", "Cumilla Sadar Dakshin", "Lalmai"],
-                    "Noakhali District": ["Noakhali Sadar", "Begumganj", "Chatkhil", "Companiganj", "Hatiya", "Kabirhat", "Senbagh", "Sonaimuri", "Subarnachar"],
-                    "Feni District": ["Feni Sadar", "Chhagalnaiya", "Daganbhuiyan", "Fulgazi", "Parshuram", "Sonagazi"],
-                    "Lakshmipur District": ["Lakshmipur Sadar", "Kamalnagar", "Raipur", "Ramganj", "Ramgati"],
-                    "Chandpur District": ["Chandpur Sadar", "Faridganj", "Haimchar", "Hajiganj", "Kachua", "Matlab Dakshin", "Matlab Uttar", "Shahrasti"],
-                    "Brahmanbaria District": ["Brahmanbaria Sadar", "Akhaura", "Ashuganj", "Bancharampur", "Bijoynagar", "Kasba", "Nabinagar", "Nasirnagar", "Sarail"],
-                    "Khagrachhari District": ["Khagrachhari Sadar", "Dighinala", "Lakshmichhari", "Mahalchhari", "Manikchhari", "Matiranga", "Panchhari", "Ramgarh", "Guimara"],
-                    "Rangamati District": ["Rangamati Sadar", "Baghaichhari", "Barkal", "Belaichhari", "Juraichhari", "Kaptai", "Kawkhali", "Langadu", "Naniarchar", "Rajasthali"],
-                    "Bandarban District": ["Bandarban Sadar", "Alikadam", "Lama", "Naikhongchhari", "Rowangchhari", "Ruma", "Thanchi"]
-                },
-                "Rajshahi Division": {
-                    "Rajshahi District": ["Rajshahi Sadar", "Bagha", "Bagmara", "Charghat", "Durgapur", "Godagari", "Mohanpur", "Paba", "Puthia", "Tanore"],
-                    "Bogura District": ["Bogura Sadar", "Adamdighi", "Dhunat", "Dhupchanchia", "Gabtali", "Kahaloo", "Nandigram", "Sariakandi", "Shajahanpur", "Sherpur", "Shibganj", "Sonatala"],
-                    "Joypurhat District": ["Joypurhat Sadar", "Akkelpur", "Kalai", "Khetlal", "Panchbibi"],
-                    "Naogaon District": ["Naogaon Sadar", "Atrai", "Badalgachhi", "Dhamoirhat", "Manda", "Mahadebpur", "Niamatpur", "Patnitala", "Porsha", "Raninagar", "Sapahar"],
-                    "Natore District": ["Natore Sadar", "Bagatipara", "Baraigram", "Gurudaspur", "Lalpur", "Singra", "Naldanga"],
-                    "Chapainawabganj District": ["Chapainawabganj Sadar", "Bholahat", "Gomastapur", "Nachole", "Shibganj"],
-                    "Pabna District": ["Pabna Sadar", "Atgharia", "Bera", "Bhangura", "Chatmohar", "Faridpur", "Ishwardi", "Santhia", "Sujanagar"],
-                    "Sirajganj District": ["Sirajganj Sadar", "Belkuchi", "Chauhali", "Kamarkhanda", "Kazipur", "Raiganj", "Shahjadpur", "Tarash", "Ullahpara"]
-                },
-                "Khulna Division": {
-                    "Khulna District": ["Khulna Sadar", "Batiaghata", "Dacope", "Dumuria", "Dighalia", "Koyra", "Paikgachha", "Phultala", "Rupsa", "Terokhada"],
-                    "Bagerhat District": ["Bagerhat Sadar", "Chitalmari", "Fakirhat", "Kachua", "Mollahat", "Mongla", "Morrelganj", "Rampal", "Sarankhola"],
-                    "Chuadanga District": ["Chuadanga Sadar", "Alamdanga", "Damurhuda", "Jibannagar"],
-                    "Jashore District": ["Jashore Sadar", "Abhaynagar", "Bagherpara", "Chaugachha", "Jhikargachha", "Keshabpur", "Manirampur", "Sharsha"],
-                    "Jhenaidah District": ["Jhenaidah Sadar", "Harinakunda", "Kaliganj", "Kotchandpur", "Maheshpur", "Shailkupa"],
-                    "Kushtia District": ["Kushtia Sadar", "Bheramara", "Daulatpur", "Khoksa", "Kumarkhali", "Mirpur"],
-                    "Magura District": ["Magura Sadar", "Mohammadpur", "Shalikha", "Sreepur"],
-                    "Meherpur District": ["Meherpur Sadar", "Gangni", "Mujibnagar"],
-                    "Narail District": ["Narail Sadar", "Kalia", "Lohagara"],
-                    "Satkhira District": ["Satkhira Sadar", "Assasuni", "Debhata", "Kalaroa", "Kaliganj", "Shyamnagar", "Tala"]
-                },
-                "Barishal Division": {
-                    "Barishal District": ["Barishal Sadar", "Agailjhara", "Babuganj", "Bakerganj", "Banaripara", "Gaurnadi", "Hizla", "Mehendiganj", "Muladi", "Wazirpur"],
-                    "Bhola District": ["Bhola Sadar", "Burhanuddin", "Char Fasson", "Daulatkhan", "Lalmohan", "Manpura", "Tazumuddin"],
-                    "Barguna District": ["Barguna Sadar", "Amtali", "Bamna", "Betagi", "Patharghata", "Taltali"],
-                    "Jhalokathi District": ["Jhalokathi Sadar", "Kathalia", "Nalchity", "Rajapur"],
-                    "Patuakhali District": ["Patuakhali Sadar", "Bauphal", "Dashmina", "Dumki", "Galachipa", "Kalapara", "Mirzaganj", "Rangabali"],
-                    "Pirojpur District": ["Pirojpur Sadar", "Bhandaria", "Kawkhali", "Mathbaria", "Nazirpur", "Nesarabad", "Zianagar"]
-                },
-                "Rangpur Division": {
-                    "Rangpur District": ["Rangpur Sadar", "Badarganj", "Gangachara", "Kaunia", "Mithapukur", "Pirgachha", "Pirganj", "Taraganj"],
-                    "Dinajpur District": ["Dinajpur Sadar", "Biral", "Birampur", "Birganj", "Bochaganj", "Chirirbandar", "Fulbari", "Ghoraghat", "Hakimpur", "Kaharole", "Khansama", "Nawabganj", "Parbatipur"],
-                    "Gaibandha District": ["Gaibandha Sadar", "Fulchhari", "Gobindaganj", "Palashbari", "Sadullapur", "Saghatta", "Sundarganj"],
-                    "Kurigram District": ["Kurigram Sadar", "Bhurungamari", "Char Rajibpur", "Chilmari", "Phulbari", "Nageshwari", "Rajarhat", "Raomari", "Ulipur"],
-                    "Lalmonirhat District": ["Lalmonirhat Sadar", "Aditmari", "Hatibandha", "Kaliganj", "Patgram"],
-                    "Nilphamari District": ["Nilphamari Sadar", "Dimla", "Domar", "Jaldhaka", "Kishoreganj", "Saidpur"],
-                    "Panchagarh District": ["Panchagarh Sadar", "Atwari", "Boda", "Debiganj", "Tetulia"],
-                    "Thakurgaon District": ["Thakurgaon Sadar", "Baliadangi", "Haripur", "Pirganj", "Ranishankail"]
-                },
-                "Mymensingh Division": {
-                    "Mymensingh District": ["Mymensingh Sadar", "Bhaluka", "Dhobaura", "Fulbaria", "Gaffargaon", "Gauripur", "Haluaghat", "Ishwarganj", "Muktagachha", "Nandail", "Phulpur", "Trishal", "Tarakanda"],
-                    "Jamalpur District": ["Jamalpur Sadar", "Bakshiganj", "Dewanganj", "Islampur", "Madarganj", "Melandaha", "Sarishabari"],
-                    "Netrokona District": ["Netrokona Sadar", "Atpara", "Barhatta", "Durgapur", "Kalmakanda", "Kendua", "Khaliajuri", "Madan", "Mohanganj", "Purbadhala"],
-                    "Sherpur District": ["Sherpur Sadar", "Jhenaigati", "Nakla", "Nalitabari", "Sreebardi"]
-                }
+                "Sylhet Division": ["Sylhet District", "Habiganj District", "Moulvibazar District", "Sunamganj District"],
+                "Dhaka Division": ["Dhaka District", "Faridpur District", "Gazipur District", "Gopalganj District", "Kishoreganj District", "Madaripur District", "Manikganj District", "Munshiganj District", "Narayanganj District", "Narsingdi District", "Rajbari District", "Shariatpur District", "Tangail District"],
+                "Chittagong Division": ["Chittagong District", "Cox's Bazar District", "Cumilla District", "Noakhali District", "Feni District", "Lakshmipur District", "Chandpur District", "Brahmanbaria District", "Khagrachhari District", "Rangamati District", "Bandarban District"],
+                "Rajshahi Division": ["Rajshahi District", "Bogura District", "Joypurhat District", "Naogaon District", "Natore District", "Chapainawabganj District", "Pabna District", "Sirajganj District"],
+                "Khulna Division": ["Khulna District", "Bagerhat District", "Chuadanga District", "Jashore District", "Jhenaidah District", "Kushtia District", "Magura District", "Meherpur District", "Narail District", "Satkhira District"],
+                "Barishal Division": ["Barishal District", "Bhola District", "Barguna District", "Jhalokathi District", "Patuakhali District", "Pirojpur District"],
+                "Rangpur Division": ["Rangpur District", "Dinajpur District", "Gaibandha District", "Kurigram District", "Lalmonirhat District", "Nilphamari District", "Panchagarh District", "Thakurgaon District"],
+                "Mymensingh Division": ["Mymensingh District", "Jamalpur District", "Netrokona District", "Sherpur District"]
             };
 
             function updateDistricts() {
                 const div = document.getElementById('divisionSelect').value;
                 const distSelect = document.getElementById('districtSelect');
-                const upaSelect = document.getElementById('upazilaSelect');
                 distSelect.innerHTML = '<option value="">District</option>';
-                upaSelect.innerHTML = '<option value="">Upazila</option>';
 
                 if(bdData[div]) {
-                    Object.keys(bdData[div]).forEach(d => {
+                    bdData[div].forEach(d => {
                         distSelect.innerHTML += '<option value="' + d + '">' + d + '</option>';
-                    });
-                }
-            }
-
-            function updateUpazilas() {
-                const div = document.getElementById('divisionSelect').value;
-                const dist = document.getElementById('districtSelect').value;
-                const upaSelect = document.getElementById('upazilaSelect');
-                upaSelect.innerHTML = '<option value="">Upazila</option>';
-
-                if(bdData[div] && bdData[div][dist]) {
-                    bdData[div][dist].forEach(u => {
-                        upaSelect.innerHTML += '<option value="' + u + '">' + u + '</option>';
                     });
                 }
             }
@@ -512,9 +419,8 @@ app.get('/', (req, res) => {
             function concatAddress() {
                 const div = document.getElementById('divisionSelect').value;
                 const dist = document.getElementById('districtSelect').value;
-                const upa = document.getElementById('upazilaSelect').value;
                 const detail = document.getElementById('fullAddress').value;
-                document.getElementById('fullAddress').value = div + ' -> ' + dist + ' -> ' + upa + ' -> ' + detail;
+                document.getElementById('fullAddress').value = div + ' -> ' + dist + ' -> ' + detail;
             }
 
             function orderModal(pid) {
