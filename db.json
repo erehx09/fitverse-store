@@ -1,0 +1,42 @@
+{
+  "products": [
+    {
+      "id": 1787581895355,
+      "name": "hi",
+      "price": 121,
+      "category": "222",
+      "images": [
+        "/uploads/1787581895352.JPG"
+      ]
+    }
+  ],
+  "orders": [],
+  "site_content": {
+    "hero_title": "FITVERSE ",
+    "hero_video": "https://youtu.be/o5IYI1a0fXA?si=GjhpI_VOF_R-jcjn",
+    "brand_name": "Fitverse",
+    "hero_subtitle": "CLOTHING BRAND",
+    "whatsapp_number": "",
+    "hero_videos": [
+      "/uploads/1787591625559.MP4"
+    ],
+    "hero_tagline": "DISCOVER THE COLLECTION",
+    "hero_button_text": "Order Now",
+    "section_badge": "Sections",
+    "section_title": "Collections",
+    "nav_home": "Home",
+    "nav_collection": "Collection",
+    "nav_theme": "Theme",
+    "nav_support": "Support",
+    "buy_btn_text": "Order"
+  },
+  "categories": [
+    "Clothing",
+    "Accessories",
+    "Essentials Wardrobe",
+    "Footwear",
+    "Your Pieces",
+    "Everything",
+    "Boxy tee"
+  ]
+}
