@@ -259,6 +259,7 @@ app.get('/', (req, res) => {
                         <input type="text" name="phone" placeholder="017XXXXXXXX" maxlength="11" required oninput="this.value = this.value.replace(/[^0-9]/g, '');" class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500 font-mono">
                     </div>
 
+                    <!-- Only Division and District (Upazila removed) -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Division</label>
@@ -283,7 +284,7 @@ app.get('/', (req, res) => {
                     </div>
 
                     <div>
-                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Street / Thana / House / Area Details</label>
+                        <label class="input-label block text-[10px] uppercase tracking-widest mb-1">Street / Thana / House / Village Details</label>
                         <textarea id="fullAddress" name="address" placeholder="Thana, House no, Road no, Area details" required class="input-box w-full p-3.5 rounded-xl text-sm focus:outline-none focus:border-blue-500" rows="2"></textarea>
                     </div>
 
@@ -831,4 +832,4 @@ app.post('/admin/product/delete', (req, res) => {
     res.redirect('/admin?pass=fitverse123');
 });
 
-app.listen(PORT, () => console.log(`FITVERSE Multi-Image Fixed System Running on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`FITVERSE Running on http://localhost:${PORT}`));
